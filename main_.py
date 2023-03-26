@@ -3,6 +3,7 @@ from random import randrange as rnd
 
 import level
 import player
+import platforms
 
 DISPLAY = WIN_WIDTH, WIN_HEIGHT = 800, 600
 BG_COLOR = ((rnd(0,255)),(rnd(0,255)),(rnd(0,255)))
@@ -15,14 +16,30 @@ def main():
     mw.fill(BG_COLOR)
     pg.display.set_caption('Mario')
     timer = pg.time.Clock() 
+
     pl = player.Player(50, 50)
     left = right = up = False
 
-    g = True
-    while g:
+    entities = pg.sprite.Group()
+    platforms_list = []
+    entities.add(pl)
+
+    x=y=0
+    for row in level.level:
+        for item in row:
+            if item == '-':
+                pf = platforms.Platform(x, y)
+                entities.add(pf)
+                platforms_list.append(pf)
+            x += level.PF_WIDTH
+        y += level.PF_HEIGHT
+        x = 0
+
+    game = True
+    while game:
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                g = False
+                game = False
 
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_a: left = True
@@ -35,21 +52,8 @@ def main():
                 if event.key == pg.K_SPACE: up = False
 
         mw.fill(BG_COLOR)
-
-        x=y=0
-
-        for row in level.level:
-            for item in row:
-                if item == '-':
-                    pf = pg.Surface(level.PF_SIZE)
-                    pf.fill(level.PF_COLOR)
-                    mw.blit(pf, (x,y))
-                x += level.PF_WIDTH
-            y += level.PF_HEIGHT
-            x = 0
-
-        pl.update(left, right, up)
-        pl.draw(mw)
+        pl.update(left, right, up, platforms_list)
+        entities.draw(mw)
 
         pg.display.update()
         timer.tick(fps)
