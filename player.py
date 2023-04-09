@@ -1,4 +1,5 @@
 import pygame as pg 
+import pyganim
 import platforms as pf
 SPEED = 7
 
@@ -8,6 +9,25 @@ PL_COLOR = (200, 100, 100)
 GRAVITY = 0.35
 JUMP_POWER = 10
 
+ANIMATION_RIGHT = [
+    'mario/r1.png',
+    'mario/r2.png',
+    'mario/r3.png',
+    'mario/r4.png',
+    'mario/r5.png']
+ANIMATION_LEFT = [
+    'mario/l1.png',
+    'mario/l2.png',
+    'mario/l3.png',
+    'mario/l4.png',
+    'mario/l5.png']
+ANIMATION_JUMP_RIGHT = [('mario/jr.png', 4)]
+ANIMATION_JUMP_LEFT = [('mario/jl.png', 4)]
+ANIMATION_JUMP = [('mario/j.png', 4)]
+ANIMATION_STAY = [('mario/0.png', 4)]
+ANIMATION_DELAY = 4
+
+
 class Player(pg.sprite.Sprite):
     def __init__(self, x, y):
         pg.sprite.Sprite.__init__(self)
@@ -16,20 +36,57 @@ class Player(pg.sprite.Sprite):
         self.yvel = 0
         self.startX = x
         self.startY = y
-        self.image = pg.Surface((PL_WIDTH, PL_HEIGHT))
-        self.image.fill(PL_COLOR)
+        self.image = pg.transform.scale(pg.image.load('img/mario.png'), (PL_WIDTH, PL_HEIGHT))
         self.rect = pg.Rect(x, y, PL_WIDTH, PL_HEIGHT)
 
+        anim = []
+        for a in ANIMATION_RIGHT:
+            anim.append((a, ANIMATION_DELAY))
+        self.AnimRight = pyganim.PygAnimation(anim)
+        self.AnimRight.play()
+
+        anim = []
+        for a in ANIMATION_LEFT:
+            anim.append((a, ANIMATION_DELAY))
+        self.AnimLeft = pyganim.PygAnimation(anim)
+        self.AnimLeft.play()
+
+        self.AnimStay = pyganim.PygAnimation(ANIMATION_STAY)
+        self.AnimStay.play()
+        self.AnimStay.blit(self.image, (0,0))
+
+        self.AnimJumpL = pyganim.PygAnimation(ANIMATION_JUMP_LEFT)
+        self.AnimJumpL.play()
+
+        self.AnimJumpR = pyganim.PygAnimation(ANIMATION_JUMP_RIGHT)
+        self.AnimJumpR.play()
+
+        self.AnimJump = pyganim.PygAnimation(ANIMATION_JUMP)
+        self.AnimJump.play()
+
+
+
     def update(self, left: bool, right: bool, up: bool, platforms):
+        self.image.fill((0,0,0,0))
         if up: 
-            if self.onGround: self.yvel = -JUMP_POWER
+            if self.onGround: 
+                self.yvel = -JUMP_POWER
+                self.AnimJump.blit(self.image, (0,0))
 
-        if left: self.xvel = -SPEED
-        if right: self.xvel = SPEED
+        if left: 
+            self.xvel = -SPEED
+            self.AnimLeft.blit(self.image, (0,0))
 
-        if not(left or right): self.xvel = 0
+        if right: 
+            self.xvel = SPEED
+            self.AnimRight.blit(self.image, (0,0))
 
-        if not self.onGround: self.yvel += GRAVITY
+        if not(left or right): 
+            self.xvel = 0
+            self.AnimStay.blit(self.image, (0,0))
+
+        if not self.onGround: 
+            self.yvel += GRAVITY
 
         self.onGround = False
 
