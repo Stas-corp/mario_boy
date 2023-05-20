@@ -1,8 +1,8 @@
 import pygame as pg 
 import pyganim
 import platforms as pf
-SPEED = 7
 
+SPEED = 7
 PL_HEIGHT = 30
 PL_WIDTH = 22
 PL_COLOR = (200, 100, 100)
@@ -39,6 +39,8 @@ class Player(pg.sprite.Sprite):
         self.image = pg.transform.scale(pg.image.load('img/mario.png'), (PL_WIDTH, PL_HEIGHT))
         self.rect = pg.Rect(x, y, PL_WIDTH, PL_HEIGHT)
 
+        self.image.set_colorkey((0,0,0,0))
+
         anim = []
         for a in ANIMATION_RIGHT:
             anim.append((a, ANIMATION_DELAY))
@@ -64,29 +66,49 @@ class Player(pg.sprite.Sprite):
         self.AnimJump = pyganim.PygAnimation(ANIMATION_JUMP)
         self.AnimJump.play()
 
-
-
     def update(self, left: bool, right: bool, up: bool, platforms):
-        self.image.fill((0,0,0,0))
+        
         if up: 
             if self.onGround: 
                 self.yvel = -JUMP_POWER
-                self.AnimJump.blit(self.image, (0,0))
+            # self.image.fill((0,0,0,0))
+            # self.AnimJump.blit(self.image, (0,0)) 
 
         if left: 
             self.xvel = -SPEED
+            self.image.fill((0,0,0,0))
+            # if up or not self.onGround:
+            #     self.AnimJumpL.blit(self.image, (0,0))
+            # else:
             self.AnimLeft.blit(self.image, (0,0))
 
         if right: 
             self.xvel = SPEED
+            self.image.fill((0,0,0,0))
+            # if up or not self.onGround:
+            #     self.AnimJumpR.blit(self.image, (0,0))
+            # else:
             self.AnimRight.blit(self.image, (0,0))
 
         if not(left or right): 
             self.xvel = 0
-            self.AnimStay.blit(self.image, (0,0))
+            if not up:
+                pass
+                # self.image.fill((0,0,0,0))
+                # self.AnimStay.blit(self.image, (0,0))
 
         if not self.onGround: 
             self.yvel += GRAVITY
+
+        if self.yvel < 0:
+            self.image.fill((0,0,0,0))
+            self.AnimJump.blit(self.image, (0,0))
+        if self.yvel < 0 and self.xvel < 0:
+            self.image.fill((0,0,0,0))
+            self.AnimJumpL.blit(self.image, (0,0))
+        if self.yvel < 0 and self.xvel > 0:
+            self.image.fill((0,0,0,0))
+            self.AnimJumpR.blit(self.image, (0,0))
 
         self.onGround = False
 
